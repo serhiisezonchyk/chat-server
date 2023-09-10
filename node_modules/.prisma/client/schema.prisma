@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ChatMembership {
+  id            String   @id @default(uuid())
+  user          User     @relation(fields: [user_id], references: [id])
+  user_id        String
+  chat          Chat     @relation(fields: [chat_id], references: [id])
+  chat_id        String
+  isBlacklisted Boolean  @default(false)
+  created_at    DateTime @default(now())
+
+  @@map("chat_membership")
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique @db.VarChar(100)
+  login           String           @unique @db.VarChar(50)
+  password        String           @db.VarChar(256)
+  name            String           @db.VarChar(100)
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  messages        Message[]
+  chats           ChatMembership[]
+
+  @@map("user")
+}
+
+model Chat {
+  id              String           @id @default(uuid())
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  messages        Message[]
+  members         ChatMembership[]
+
+  @@map("chat")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  text       String   @db.VarChar(256)
+  chat       Chat     @relation(fields: [chat_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "message_fk_chat")
+  chat_id    String
+  sender     User     @relation(fields: [sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "message_fk_user")
+  sender_id  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("message")
+}
