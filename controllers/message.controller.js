@@ -24,10 +24,33 @@ export const getMessages = async (req, res) => {
       where: {
         chat_id: chat_id,
       },
+      orderBy:{
+        created_at:'asc'
+      }
     });
     return res.status(200).json(messages);
   } catch (error) {
     console.log(error);
+    return res.status(400).json({ error: 'Something went wrong...' });
+  }
+};
+
+export const getLatestMessage = async (req, res) => {
+  const { chat_id } = req.params;
+  
+  try {
+    const latestMessage = await prisma.message.findFirst({
+      where: {
+        chat_id,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return res.status(200).json(latestMessage);
+  } catch (error) {
+    console.error(error);
     return res.status(400).json({ error: 'Something went wrong...' });
   }
 };

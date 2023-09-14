@@ -112,9 +112,16 @@ export const check = async (req, res) => {
 
 export const getUser = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
   try {
-    const user = await prisma.user.findFirst({ where: { id: id } });
+    const user = await prisma.user.findFirst({
+      where: { id: id },
+      select: {
+        id: true,
+        email: true,
+        login: true,
+        name: true,
+      },
+    });
     return res.status(200).json(user || {});
   } catch (error) {
     console.log(error);
@@ -125,7 +132,6 @@ export const getUser = async (req, res) => {
 };
 
 export const getUsers = async (req, res) => {
-
   const search_line = req.query?.search_line?.trim() || '';
   try {
     const users = await prisma.user.findMany({
@@ -144,6 +150,12 @@ export const getUsers = async (req, res) => {
             },
           },
         ],
+      },
+      select: {
+        id: true,
+        email: true,
+        login: true,
+        name: true,
       },
     });
     return res.status(200).json(users);
